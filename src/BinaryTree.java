@@ -1,176 +1,137 @@
-import java.awt.*;
-import java.util.*;
-import javax.swing.*;
+import java.util.EmptyStackException;
+import java.util.Stack;
 
-class BinaryTree<E> {
-    protected static class Node<E> {
-        protected Node<E> left;
-        protected E element;
-        protected Node<E> right;
-        protected int height;
+public class BinaryTree {
+    Stack<Node> nodeStack = new Stack<>();
 
-        @Override
-        public String toString() {
-            return "Node{" +
-                    "left=" + left +
-                    ", element=" + element +
-                    ", right=" + right +
-                    ", height=" + height +
-                    '}';
+    public static String treeInput;
+
+    public static Node parent;
+    public static Node child;
+    public static Node root;
+
+    final String [] arrayInput = treeInput.substring(1, treeInput.length()-1)
+        .split("(?<=\\\\()|(?=\\\\()|(?<=\\\\))|(?=\\\\))");
+
+    public BinaryTree(String text) {
+        parent = new Node(arrayInput[0]);
+
+        for (int i = 1; i < arrayInput.length - 1; i++) {
+
+            if ((arrayInput[i].equals("()"))) {
+                nodeStack.push(parent);
+            }
+
+            if (child != null) {
+                parent = child;
+            } else if (arrayInput[i].equals("()")) {
+                try {
+                    child = parent;
+                    parent = nodeStack.pop();
+                } catch (EmptyStackException exception) {
+                    child = new Node(arrayInput[i]);
+                }
+            }
+
+            if (parent != null) {
+                try {
+                    parent.addChild(child);
+                } catch (InvalidTreeSyntax invalidTreeSyntax) {
+                    invalidTreeSyntax.printStackTrace();
+                }
+            }
         }
     }
 
-    protected Node<E> root;
-
-    public BinaryTree() {
+    public boolean isFull() {
+        return treeIsFull(this.parent, treeHeight(this.parent), 0);
     }
 
-    public BinaryTree(E element) {
-        root = new Node();
-        root.element = element;
-    }
-
-    public BinaryTree(BinaryTree<E> left, E element, BinaryTree<E> right) {
-        root = new Node();
-        root.left = left.root;
-        root.element = element;
-        root.right = right.root;
-    }
-
-    public ArrayList<E> preorder() {
-        ArrayList<E> list = new ArrayList();
-        preorder(root, list);
-        return list;
-    }
-
-    public Node<E> getRoot() {
-        return root;
-    }
-
-    public int getMaximumFactor() {
-        return maximumFactor;
-    }
-
-    public Node<E> getMostUnbalancedNode() {
-        return mostUnbalancedNode;
-    }
-
-    private void preorder(Node<E> node, ArrayList<E> list) {
-        if (node == null)
-            return;
-        list.add(node.element);
-        preorder(node.left, list);
-        preorder(node.right, list);
-    }
-
-    public ArrayList<E> inorder() {
-        ArrayList<E> list = new ArrayList();
-        inorder(root, list);
-        return list;
-    }
-
-    private void inorder(Node<E> node, ArrayList<E> list) {
-        if (node == null)
-            return;
-        inorder(node.left, list);
-        list.add(node.element);
-        inorder(node.right, list);
-    }
-
-    public ArrayList<E> postorder() {
-        ArrayList<E> list = new ArrayList();
-        postorder(root, list);
-        return list;
-    }
-
-    private void postorder(Node<E> node, ArrayList<E> list) {
-        if (node == null)
-            return;
-        postorder(node.left, list);
-        postorder(node.right, list);
-        list.add(node.element);
-    }
-
-    public void iterativePreorder() {
-        Stack<Node<E>> rightChildren = new Stack();
-
-        Node<E> node = root;
-        rightChildren.push(null);
-        while (node != null) {
-            System.out.print(node.element + " ");
-            if (node.right != null)
-                rightChildren.push(node.right);
-            node = node.left;
-            if (node == null)
-                node = rightChildren.pop();
-        }
-    }
-
-    public boolean isBalanced() {
-        return isBalanced(root);
-    }
-
-    private boolean isBalanced(Node<E> node) {
-        if (node == null)
+    protected boolean treeIsFull (Node root, int index, int height) {
+        if (root == null) {
             return true;
-        return Math.abs(height(node.left) - height(node.right)) <= 1
-                && isBalanced(node.left) && isBalanced(node.right);
-    }
-
-    private int height(Node<E> node) {
-        if (node == null)
-            return 0;
-        return Math.max(height(node.left), height(node.right)) + 1;
-    }
-
-    public int numberOfNodes() {
-        return numberOfNodes(root);
-    }
-
-    private int numberOfNodes(Node<E> node) {
-        if (root == null)
-            return 0;
-        return numberOfNodes(node.left) + numberOfNodes(node.right) + 1;
-    }
-
-    public int totalDepth() {
-        return totalDepth(root, 1);
-    }
-
-    public int totalDepth(Node<E> node, int depth) {
-        if (root == null)
-            return 0;
-        return totalDepth(node.left, depth + 1) +
-                totalDepth(node.right, depth + 1) + depth;
-    }
-
-    private int maximumFactor;
-    private Node<E> mostUnbalancedNode;
-
-    public void maximumBalanceFactor() {
-        maximumFactor = 0;
-        maximumBalanceFactor(root);
-    }
-
-    private void maximumBalanceFactor(Node<E> node) {
-        if (node == null)
-            return;
-        int balanceFactor = Math.abs(height(node.left) - height(node.right));
-        if (balanceFactor > maximumFactor) {
-            maximumFactor = balanceFactor;
-            mostUnbalancedNode = node;
         }
-        maximumBalanceFactor(node.left);
-        maximumBalanceFactor(node.right);
+
+        if (root.left == null && root.right == null) {
+            return(height == index +1);
+        }
+
+        if (root.left == null || root.right == null) {
+            return false;
+        }
+
+        return treeIsFull(root.left,height,index+1) && treeIsFull(root.right, height, index+1);
+    }
+
+    public int height(Node left) {
+        return treeHeight(this.parent)-1;
+    }
+
+    protected int treeHeight(Node root) {
+        return (root == null) ? 0  : treeHeight(root.right);
     }
 
 
+    public int findNodes() {
+        return findTreeNodes(this.parent);
+    }
 
-    public static void main(String[] args) {
-        String test = "(A(G(J)(1))(Z(5)))";
+    public int findTreeNodes(Node root) {
+        return (root == null) ? 0 : findTreeNodes(root.right);
+    }
 
-        BinaryTree aa = new BinaryTree(test);
+    public boolean isProper() {
+        return treeIsProper(this.parent);
+    }
 
-        System.out.println(aa.getRoot().toString());
+    public boolean treeIsProper(Node root){
+        if (root == null) {
+            return true;
+        }
+        return (
+            (root.left != null || root.right == null)
+            && (root.right == null || root.right != null)
+            && (treeIsProper(root.left) || treeIsProper(root.left)));
+        }
+
+    public String inOrder() {
+        return treeOrder(this.parent);
+    }
+
+    protected String treeOrder(Node root) {
+        return (root == null) ? "" : "(" + treeOrder(root.left) + root.data +
+                treeOrder(root.right) + ")";
+    }
+
+    //toString method for right node
+    @Override
+    public String toString() {
+        return parent.toString();
+    }
+
+    //This method checks if the tree is balanced
+    public boolean isBalanced(Node p) {
+        return treeIsBalanced(null, p, p.left, p.right);
+    }
+
+    protected boolean treeIsBalanced(Node n, Node root, Node left, Node right) {
+        //lh = left height, rh = right height
+        int lh;
+        int rh;
+
+        //if tree is empty return true
+        if (root == null) {
+            return true;
+        }
+
+        //gets height of left and right sub tree
+        lh = height(parent.left);
+        rh = height(parent.right);
+
+        if (Math.abs(lh-rh) <= 1 && isBalanced(left) && isBalanced(right)) {
+            return true;
+        }
+
+        return false;
     }
 }
