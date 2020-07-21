@@ -22,31 +22,36 @@ public class Project3 extends JFrame {
     }
 
     public ActionListener treeActionListener = event -> {
-        BinaryTree treeInput = new BinaryTree(input.getText());
-        switch (event.getActionCommand()) {
-            case "Make Tree":
-                output.setText(treeInput.toString());
-                break;
-            case "Is Balanced?":
-                output.setText(String.valueOf(treeInput.isBalanced(null)));
-                break;
-            case "Is Full? ":
-                output.setText(String.valueOf(treeInput.isFull()));
-                break;
-            case "Is Proper? ":
-                output.setText(String.valueOf(treeInput.isProper()));
-                break;
-            case "Height":
-                output.setText(String.valueOf(treeInput.height(null)));
-                break;
-            case "Nodes":
-                output.setText(String.valueOf(""));
-                break;
-            case "Inorder":
-                output.setText(String.valueOf(treeInput.inOrder()));
-                break;
-            default:
-                break;
+        try {
+            BinaryTree treeInput = new BinaryTree(input.getText());
+
+            switch (event.getActionCommand()) {
+                case "Make Tree":
+                    output.setText(treeInput.toString());
+                    break;
+                case "Is Balanced?":
+                    output.setText(String.valueOf(treeInput.isBalanced(null)));
+                    break;
+                case "Is Full? ":
+                    output.setText(String.valueOf(treeInput.isFull()));
+                    break;
+                case "Is Proper? ":
+                    output.setText(String.valueOf(treeInput.isProper()));
+                    break;
+                case "Height":
+                    output.setText(String.valueOf(treeInput.height(null)));
+                    break;
+                case "Nodes":
+                    output.setText(String.valueOf(""));
+                    break;
+                case "Inorder":
+                    output.setText(String.valueOf(treeInput.inOrder()));
+                    break;
+                default:
+                    break;
+            }
+        } catch (InvalidTreeSyntax invalidTreeSyntax) {
+            invalidTreeSyntax.printStackTrace();
         }
     };
 
