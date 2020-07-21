@@ -2,28 +2,43 @@ import javax.swing.tree.TreeNode;
 import java.util.*;
 
 public class BinaryTree {
-    public static void main(String[] args) {
-        String test = "(A(G(j)(1))(z(5)))";
-        String test2 = "AFDFASDASdf";
+//    public static void main(String[] args) {
+//        String test = "(A(G(j)(1))(z(5)))";
+//        String test2 = "AFDFASDASdf";
+//
+//        System.out.println("test = " + test);
+//        System.out.println("test.length() = " + test.length());
+//
+//        try {
+//            BinaryTree testBT = new BinaryTree(test);
+//
+//            System.out.println("testBT.parent.toString() = " + testBT.parent.toString());
+//
+//
+//        } catch (InvalidTreeSyntax invalidTreeSyntax) {
+//            invalidTreeSyntax.printStackTrace();
+//        }
+//    }
 
-        System.out.println("test = " + test);
-        System.out.println("test.length() = " + test.length());
-
-        try {
-            BinaryTree testBT = new BinaryTree(test);
-        } catch (InvalidTreeSyntax invalidTreeSyntax) {
-            invalidTreeSyntax.printStackTrace();
-        }
-    }
-
+    /**
+     * Constructor that creates binary tree and save it in parent
+     * @param btStr
+     * @throws InvalidTreeSyntax
+     */
     public BinaryTree(String btStr) throws InvalidTreeSyntax {
         if (btStr.equals("") || !String.valueOf(btStr.charAt(0)).equals("(")) throw new InvalidTreeSyntax("Binary Tree Syntax must begin with open parentheses");
-        nodeStack.add(createBinaryTree(btStr));
+        parent = createBinaryTree(btStr);
+        System.out.println("parent.toString() = " + parent.toString());
     }
 
+    /**
+     * Helper method that creates binary tree.
+     * @param treenodeStr
+     * @return
+     * @throws InvalidTreeSyntax
+     */
     private Node createBinaryTree(String treenodeStr) throws InvalidTreeSyntax {
         if (start <= treenodeStr.length() - 2) {
-            System.out.println("start = " + start);
             char c = treenodeStr.charAt(start);
             int l = treenodeStr.length();
 
@@ -62,6 +77,11 @@ public class BinaryTree {
         }
     }
 
+    /**
+     * Carefully increment with out generating indexOutOfBounds in helper method
+     * @param ml
+     * @return
+     */
     private int carefulIncrement(int ml) {
         if (start + 1 < ml) {
             return start++;
@@ -70,12 +90,22 @@ public class BinaryTree {
         }
     }
 
+    /**
+     * Checks if character is either a letter or number with a char as input
+     * @param c
+     * @return
+     */
     private boolean isAlphaNumeric(char c) {
         return (c >= 'a' && c <= 'z') ||
                 (c >= 'A' && c <= 'Z') ||
                 (c >= '0' && c <= '9');
     }
 
+    /**
+     * Checks if character is either a letter or number with a string as input
+     * @param cStr
+     * @return
+     */
     private boolean isAlphaNumeric(String cStr) {
         char c = cStr.charAt(0);
         return (c >= 'a' && c <= 'z') ||
@@ -83,105 +113,136 @@ public class BinaryTree {
                 (c >= '0' && c <= '9');
     }
 
-
     Stack<Node> nodeStack = new Stack<>();
-
-    public static String treeInput;
 
     public static Node parent = null;
     public static Node child = null;
     public static Node root = null;
 
     private int start = 0;
-    
+
+    /**
+     * Checks if parent node is full
+     * @return
+     */
     public boolean isFull() {
         return treeIsFull(parent, treeHeight(parent), 0);
     }
 
+    /**
+     * Checks if tree is full
+     * @param root
+     * @param index
+     * @param height
+     * @return
+     */
     protected boolean treeIsFull (Node root, int index, int height) {
-        if (root == null) {
-            return true;
-        }
-
-        if (root.left == null && root.right == null) {
-            return(height == index +1);
-        }
-
-        if (root.left == null || root.right == null) {
-            return false;
-        }
-
+        if (root == null) return true;
+        if (root.left == null && root.right == null) return(height == index + 1);
+        if (root.left == null || root.right == null) return false;
         return treeIsFull(root.left,height,index+1) && treeIsFull(root.right, height, index+1);
     }
 
+    /**
+     * Checks hight of nodes
+     * @param left
+     * @return
+     */
     public int height(Node left) {
-        return treeHeight(parent)-1;
+        return treeHeight(parent) - 1;
     }
 
+    /**
+     * Return height of tree
+     * @param root
+     * @return
+     */
     protected int treeHeight(Node root) {
         return (root == null) ? 0  : treeHeight(root.right);
     }
 
-
-    public int findNodes() {
-        return findTreeNodes(parent);
-    }
-
-    public int findTreeNodes(Node root) {
-        return (root == null) ? 0 : findTreeNodes(root.right);
-    }
-
+    /**
+     * Checks if tree is proper
+     * @return
+     */
     public boolean isProper() {
         return treeIsProper(parent);
     }
 
-    public boolean treeIsProper(Node root){
-        if (root == null) {
-            return true;
-        }
+    /**
+     * Checks if tree is proper
+     * @param n
+     * @return
+     */
+    public boolean treeIsProper(Node n) {
+        if (n == null) { return true; }
         return (
-            (root.left != null || root.right == null)
-            && (root.right == null || root.right != null)
-            && (treeIsProper(root.left) || treeIsProper(root.left)));
-        }
+            (n.left != null || n.right == null)
+            && (n.right == null || n.right != null)
+            && (treeIsProper(n.left) || treeIsProper(n.left))
+        );
+    }
 
+    /**
+     * Checks if nodes are in order
+     * @return
+     */
     public String inOrder() {
         return treeOrder(parent);
     }
 
-    protected String treeOrder(Node root) {
-        return (root == null) ? "" : "(" + treeOrder(root.left) + root.data +
+    /**
+     * Helper method for inOrder
+     * @param n
+     * @return
+     */
+    protected String treeOrder(Node n) {
+        return (root == null) ? "" : "(" + treeOrder(n.left) + n.data +
                 treeOrder(root.right) + ")";
     }
 
-    //toString method for right node
+    /**
+     * Returns parent node as string.
+     * @return
+     */
     @Override
     public String toString() {
         return parent.toString();
     }
 
-    //This method checks if the tree is balanced
-    public boolean isBalanced(Node p) {
-        return treeIsBalanced(null, p, p.left, p.right);
+    /**
+     * Checks if tree is balanced
+     * @return
+     */
+    public boolean isBalanced() {
+        return treeIsBalanced(null, this.parent, this.parent.left, this.parent.right);
     }
 
+    /**
+     * overloaded method
+     * @param n
+     * @return boolean
+     */
+    public boolean isBalanced(Node n) {
+        return treeIsBalanced(null, this.parent, n.left, n.right);
+    }
+
+    /**
+     * Checks if tree is balanced
+     * @param n
+     * @param root
+     * @param left
+     * @param right
+     * @return
+     */
     protected boolean treeIsBalanced(Node n, Node root, Node left, Node right) {
-        //lh = left height, rh = right height
-        int lh;
-        int rh;
-
-        //if tree is empty return true
-        if (root == null) {
-            return true;
-        }
-
-        //gets height of left and right sub tree
-        lh = height(parent.left);
-        rh = height(parent.right);
-
-        return Math.abs(lh - rh) <= 1 && isBalanced(left) && isBalanced(right);
+        if (root == null) return true;
+        return Math.abs(height(parent.left) - height(parent.right)) <= 1 && isBalanced(left) && isBalanced(right);
     }
 
+    /**
+     * Nested Node class
+     */
     static class Node {
 
         protected String data;
